@@ -2,10 +2,10 @@
 
 public class Token
 {
-    private TokenType type { get; init; }
-    private String lexeme { get; init; }
-    private Object literal { get; init; }
-    private Int64 line { get; init; }
+    public required TokenType Type { get; init; }
+    public required String Lexeme { get; init; }
+    public Object Literal { get; init; }
+    public required Int64 Line { get; init; }
     
-    public new String ToString() => $"{type} {lexeme} {literal}";
+    public override String ToString() => $"{Type} {Lexeme} {Literal}";
 }
