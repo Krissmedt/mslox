@@ -6,6 +6,7 @@ public class Lox
     
     public static void Error(Int64 line, String message)
     {
+        HadError = true;
         Report(line, "", message);
     }
 

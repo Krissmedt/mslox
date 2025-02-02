@@ -3,6 +3,8 @@
 public class Scanner
 {
     public required String Source { get; init; }
+
+    private char[] SourceArray => Source.ToCharArray();
     private List<Token> Tokens { get; } = new();
 
     private Int32 _start = 0;
@@ -31,6 +33,7 @@ public class Scanner
     {
         char c = Advance();
         switch (c) {
+            // Single-character tokens
             case '(': AddToken(TokenType.LeftParen); break;
             case ')': AddToken(TokenType.RightParen); break;
             case '{': AddToken(TokenType.LeftBrace); break;
@@ -41,6 +44,8 @@ public class Scanner
             case '+': AddToken(TokenType.Plus); break;
             case ';': AddToken(TokenType.Semicolon); break;
             case '*': AddToken(TokenType.Star); break; 
+            
+            // Two-character tokens
             case '!':
                 AddToken(Match('=') ? TokenType.BangEqual : TokenType.Bang);
                 break;
@@ -53,14 +58,60 @@ public class Scanner
             case '>':
                 AddToken(Match('=') ? TokenType.GreaterEqual : TokenType.Greater);
                 break;
-
+            
+            // Division/comment special case
+            case '/':
+                if (Match('/')) {
+                    // A comment goes until the end of the line.
+                    while (Peek() != '\n' && !IsAtEnd()) Advance();
+                } else {
+                    AddToken(TokenType.Slash);
+                }
+                break;
+            
+            // Ignore whitespace
+            case ' ':
+            case '\r':
+            case '\t':
+                break;
+            case '\n':
+                _line++;
+                break;
             default: Lox.Error(_line, $"Unexpected character '{c}'."); break;
+            
+            // Literals
+            case '"': StringParse(); break;
         }
+    }
+
+    private void StringParse()
+    {
+        while (Peek() != '"' && !IsAtEnd()) {
+            if (Peek() == '\n') _line++;
+            Advance();
+        }
+
+        if (IsAtEnd()) {
+            Lox.Error(_line, "Unterminated string.");
+            return;
+        }
+
+        // Advance past the closing ".
+        Advance();
+
+        // Trim the surrounding quotes.
+        String value = Source.Substring(_start + 1, _current - 1);
+        AddToken(TokenType.String, value);
+    }
+
+    private char Peek() {
+        if (IsAtEnd()) return '\0';
+        return SourceArray[_current];
     }
     
     private Boolean Match(char expected) {
         if (IsAtEnd()) return false;
-        if (Source.ToCharArray()[_current] != expected) return false;
+        if (SourceArray[_current] != expected) return false;
 
         _current++;
         return true;

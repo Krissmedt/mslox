@@ -63,7 +63,6 @@ static void RunPrompt()
 
     if (Lox.HadError)
     {
-        Lox.Error(35, "Compilation failed");
         throw new ApplicationException("Lox Error");
     }
 }
