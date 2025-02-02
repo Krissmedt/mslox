@@ -1,3 +1,9 @@
-ex_statement1;
-ex_statement2;
-ex_statement3;
+var myInteger = 6;
+var myNumber = 12.46548;
+var myString = "Hello world!";
+var myMultiString = "Lox allows 
+for multi-line strings by default!";
+var encapsulatingString = "I can put ,;()+-= operators in my string";
+
+if (word == "true") {}
+if (word != "true") {}

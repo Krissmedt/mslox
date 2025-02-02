@@ -1,5 +1,6 @@
 ﻿
 using mslox;
+using mslox.Service;
 
 try
 {
@@ -27,17 +28,16 @@ catch (Exception ex)
 
 static void RunFile(String filePath)
 {
+    var sourceString = "";
     using (var reader = new StreamReader(filePath))
     {
-        while (!reader.EndOfStream)
-        {
-            Run(reader.ReadLine()!);
-        }
+        sourceString = reader.ReadToEnd();
     }
+
+    Run(sourceString);
     
     if (Lox.HadError)
     {
-        Lox.Error(35, "Compilation failed");
         throw new ApplicationException("Lox Error");
     }
 }
@@ -69,8 +69,12 @@ static void RunPrompt()
 
 static void Run(String source)
 {
-    Console.WriteLine("Compiling:");
-    Console.WriteLine($"{source}");
-    Lox.HadError = true;
+    var scanner = new Scanner() { Source = source };
+    var tokens = scanner.Scan();
+    
+    foreach (var token in tokens)
+    {
+        Console.WriteLine(token);
+    }
 }
 

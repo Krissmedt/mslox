@@ -7,4 +7,8 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <None Include="bin\Debug\net9.0\example_source.lox" />
+    </ItemGroup>
+
 </Project>

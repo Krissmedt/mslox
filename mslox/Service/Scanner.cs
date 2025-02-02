@@ -1,4 +1,6 @@
-﻿namespace mslox.Service;
+﻿using System.Collections.Immutable;
+
+namespace mslox.Service;
 
 public class Scanner
 {
@@ -10,6 +12,28 @@ public class Scanner
     private Int32 _start = 0;
     private Int32 _current = 0;
     private Int32 _line = 0;
+
+    private static ImmutableDictionary<String, TokenType> Keywords { get; } = ImmutableDictionary.CreateRange(
+        items:
+        [
+            KeyValuePair.Create(key: "and", value: TokenType.And),
+            KeyValuePair.Create(key: "class", value: TokenType.Class),
+            KeyValuePair.Create(key: "else", value: TokenType.Else),
+            KeyValuePair.Create(key: "false", value: TokenType.False),
+            KeyValuePair.Create(key: "for", value: TokenType.For),
+            KeyValuePair.Create(key: "fun", value: TokenType.Fun),
+            KeyValuePair.Create(key: "if", value: TokenType.If),
+            KeyValuePair.Create(key: "nil", value: TokenType.Nil),
+            KeyValuePair.Create(key: "or", value: TokenType.Or),
+            KeyValuePair.Create(key: "print", value: TokenType.Print),
+            KeyValuePair.Create(key: "return", value: TokenType.Return),
+            KeyValuePair.Create(key: "super", value: TokenType.Super),
+            KeyValuePair.Create(key: "this", value: TokenType.This),
+            KeyValuePair.Create(key: "true", value: TokenType.True),
+            KeyValuePair.Create(key: "var", value: TokenType.Var),
+            KeyValuePair.Create(key: "while", value: TokenType.While)
+        ]
+    );
     
     public List<Token> Scan()
     {
@@ -85,15 +109,41 @@ public class Scanner
                 if (IsDigit(c))
                 {
                     Number();
+                } else if (IsAlpha(c))
+                {
+                    Identifier();
                 }
                 else
                 {
-                    
                     Lox.Error(_line, $"Unexpected character '{c}'."); break;
                 }
                 break;
         }
     }
+
+    private void Identifier()
+    {
+        while (IsAlphaNumeric(Peek())) Advance();
+        
+        var text = Source.Substring(_start, _current - _start);
+        var type = Keywords.GetValueOrDefault(text, TokenType.Identifier);
+        
+        AddToken(type);
+    }
+    
+    private bool IsAlpha(char c)
+    {
+        return (c >= 'a' && c <= 'z') ||
+               (c >= 'A' && c <= 'Z') ||
+               c == '_';
+    }
+    
+    private bool IsAlphaNumeric(char c)
+    {
+        return IsAlpha(c) || IsDigit(c);
+    }
+
+
 
     private void Number()
     {
@@ -107,7 +157,7 @@ public class Scanner
             while (IsDigit(Peek())) Advance();
         }
         
-        AddToken(TokenType.Number, Double.Parse(Source.Substring(_start, _current)));
+        AddToken(TokenType.Number, Double.Parse(Source.Substring(_start, _current - _start)));
     }
 
     private bool IsDigit(char c)
@@ -131,7 +181,7 @@ public class Scanner
         Advance();
 
         // Trim the surrounding quotes.
-        String value = Source.Substring(_start + 1, _current - 1);
+        String value = Source.Substring(_start + 1, _current - _start - 2);
         AddToken(TokenType.String, value);
     }
 
@@ -159,7 +209,7 @@ public class Scanner
 
     private void AddToken(TokenType type, Object value)
     {
-        var text = Source.Substring(_start, _current);
+        var text = Source.Substring(_start, _current - _start);
         Tokens.Add(new Token
         {
             Type = type,
@@ -169,7 +219,6 @@ public class Scanner
         });
     }
     
-
     private Boolean IsAtEnd()
     {
         return _current >= Source.Length;
