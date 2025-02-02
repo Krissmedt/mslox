@@ -41,20 +41,30 @@ public class Scanner
             case '+': AddToken(TokenType.Plus); break;
             case ';': AddToken(TokenType.Semicolon); break;
             case '*': AddToken(TokenType.Star); break; 
+            case '!':
+                AddToken(Match('=') ? TokenType.BangEqual : TokenType.Bang);
+                break;
+            case '=':
+                AddToken(Match('=') ? TokenType.EqualEqual : TokenType.Equal);
+                break;
+            case '<':
+                AddToken(Match('=') ? TokenType.LessEqual : TokenType.Less);
+                break;
+            case '>':
+                AddToken(Match('=') ? TokenType.GreaterEqual : TokenType.Greater);
+                break;
+
             default: Lox.Error(_line, $"Unexpected character '{c}'."); break;
         }
     }
+    
+    private Boolean Match(char expected) {
+        if (IsAtEnd()) return false;
+        if (Source.ToCharArray()[_current] != expected) return false;
 
-    private Boolean IsAtEnd()
-    {
-        return _current >= Source.Length;
+        _current++;
+        return true;
     }
-
-    private Char Advance()
-    {
-        return Source.ToCharArray()[_current++];
-    }
-
     private void AddToken(TokenType type)
     {
         AddToken(type, null);
@@ -71,4 +81,17 @@ public class Scanner
             Literal = value
         });
     }
+    
+
+    private Boolean IsAtEnd()
+    {
+        return _current >= Source.Length;
+    }
+
+    private Char Advance()
+    {
+        return Source.ToCharArray()[_current++];
+    }
+
+
 }
