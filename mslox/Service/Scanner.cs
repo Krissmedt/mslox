@@ -41,6 +41,7 @@ public class Scanner
             case '+': AddToken(TokenType.Plus); break;
             case ';': AddToken(TokenType.Semicolon); break;
             case '*': AddToken(TokenType.Star); break; 
+            default: Lox.Error(_line, $"Unexpected character '{c}'."); break;
         }
     }
 

@@ -34,6 +34,12 @@ static void RunFile(String filePath)
             Run(reader.ReadLine()!);
         }
     }
+    
+    if (Lox.HadError)
+    {
+        Lox.Error(35, "Compilation failed");
+        throw new ApplicationException("Lox Error");
+    }
 }
 
 static void RunPrompt()
@@ -54,26 +60,18 @@ static void RunPrompt()
             Run(line);
         }
     }
+
+    if (Lox.HadError)
+    {
+        Lox.Error(35, "Compilation failed");
+        throw new ApplicationException("Lox Error");
+    }
 }
 
 static void Run(String source)
 {
     Console.WriteLine("Compiling:");
     Console.WriteLine($"{source}");
-    var error = true;
-    if (error)
-    {
-        Error(35, "Compilation failed");
-        throw new Exception("Run failed due to compilation error");
-    }
+    Lox.HadError = true;
 }
 
-static void Error(Int64 line, String message)
-{
-    Report(line, "", message);
-}
-
-static void Report(Int64 line, String where, String message)
-{
-    Console.Error.WriteLine($"[line {line}] Error{where}: {message}");
-}
