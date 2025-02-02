@@ -77,11 +77,42 @@ public class Scanner
             case '\n':
                 _line++;
                 break;
-            default: Lox.Error(_line, $"Unexpected character '{c}'."); break;
             
             // Literals
             case '"': StringParse(); break;
+            
+            default:
+                if (IsDigit(c))
+                {
+                    Number();
+                }
+                else
+                {
+                    
+                    Lox.Error(_line, $"Unexpected character '{c}'."); break;
+                }
+                break;
         }
+    }
+
+    private void Number()
+    {
+        while(IsDigit(Peek())) Advance();
+        
+        // Look for fractional part
+        if (Peek() == '.' && IsDigit(PeekNext()))
+        {
+            Advance();
+            
+            while (IsDigit(Peek())) Advance();
+        }
+        
+        AddToken(TokenType.Number, Double.Parse(Source.Substring(_start, _current)));
+    }
+
+    private bool IsDigit(char c)
+    {
+        return c is >= '0' and <= '9';
     }
 
     private void StringParse()
@@ -107,6 +138,11 @@ public class Scanner
     private char Peek() {
         if (IsAtEnd()) return '\0';
         return SourceArray[_current];
+    }
+    
+    private char PeekNext() {
+        if (_current + 1 > Source.Length) return '\0';
+        return SourceArray[_current + 1];
     }
     
     private Boolean Match(char expected) {
