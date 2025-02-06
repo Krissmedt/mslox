@@ -2,15 +2,15 @@
 
 public class Lox
 {
-    public static Boolean HadError = false;
-    
-    public static void Error(Int64 line, String message)
+    public static bool HadError;
+
+    public static void Error(long line, string message)
     {
         HadError = true;
         Report(line, "", message);
     }
 
-    static void Report(Int64 line, String where, String message)
+    private static void Report(long line, string where, string message)
     {
         Console.Error.WriteLine($"[line {line}] Error{where}: {message}");
     }

@@ -3,6 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mslox", "mslox\mslox.csproj", "{8095E77D-B41A-4A05-97F4-2A6956813707}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mslox.test", "mslox.test\mslox.test.csproj", "{72982F28-980A-4E18-80A4-26FED5F1F5FD}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8095E77D-B41A-4A05-97F4-2A6956813707} = {8095E77D-B41A-4A05-97F4-2A6956813707}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

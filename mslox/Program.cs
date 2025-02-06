@@ -1,5 +1,4 @@
-﻿
-using mslox;
+﻿using mslox;
 using mslox.Service;
 
 try
@@ -18,7 +17,6 @@ try
 
     RunPrompt();
     return 0;
-
 }
 catch (Exception ex)
 {
@@ -26,7 +24,7 @@ catch (Exception ex)
 }
 
 
-static void RunFile(String filePath)
+static void RunFile(string filePath)
 {
     var sourceString = "";
     using (var reader = new StreamReader(filePath))
@@ -35,11 +33,8 @@ static void RunFile(String filePath)
     }
 
     Run(sourceString);
-    
-    if (Lox.HadError)
-    {
-        throw new ApplicationException("Lox Error");
-    }
+
+    if (Lox.HadError) throw new ApplicationException("Lox Error");
 }
 
 static void RunPrompt()
@@ -52,29 +47,18 @@ static void RunPrompt()
         Console.Write("> ");
         var line = Console.ReadLine();
         if (line == null)
-        {
             running = false;
-        }
         else
-        {
             Run(line);
-        }
     }
 
-    if (Lox.HadError)
-    {
-        throw new ApplicationException("Lox Error");
-    }
+    if (Lox.HadError) throw new ApplicationException("Lox Error");
 }
 
-static void Run(String source)
+static void Run(string source)
 {
-    var scanner = new Scanner() { Source = source };
+    var scanner = new Scanner { Source = source };
     var tokens = scanner.Scan();
-    
-    foreach (var token in tokens)
-    {
-        Console.WriteLine(token);
-    }
-}
 
+    foreach (var token in tokens) Console.WriteLine(token);
+}

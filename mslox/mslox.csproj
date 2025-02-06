@@ -8,7 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <None Include="bin\Debug\net9.0\example_source.lox" />
+        <None Include="bin\Debug\net9.0\example_source.lox"/>
     </ItemGroup>
 
 </Project>

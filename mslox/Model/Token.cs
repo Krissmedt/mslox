@@ -3,9 +3,12 @@
 public class Token
 {
     public required TokenType Type { get; init; }
-    public required String Lexeme { get; init; }
-    public Object Literal { get; init; }
-    public required Int64 Line { get; init; }
-    
-    public override String ToString() => $"{Type} {Lexeme} {Literal}";
+    public required string Lexeme { get; init; }
+    public object Literal { get; init; }
+    public required long Line { get; init; }
+
+    public override string ToString()
+    {
+        return $"{Type} {Lexeme} {Literal}";
+    }
 }
