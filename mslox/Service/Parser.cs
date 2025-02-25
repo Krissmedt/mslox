@@ -137,6 +137,31 @@ public class Parser
         return new ParseError();
     }
 
+    private void Synchronize()
+    {
+        Advance();
+
+        while (!IsAtEnd())
+        {
+            if(Previous().Type == TokenType.Semicolon) return;
+
+            switch (Peek().Type)
+            {
+             case TokenType.Class:
+             case TokenType.Fun:
+             case TokenType.Var:
+             case TokenType.For:
+             case TokenType.If:
+             case TokenType.While:
+             case TokenType.Print: 
+             case TokenType.Return:
+                 return;
+            }
+
+            Advance();
+        }
+    }
+
     private bool Match(params TokenType[] types)
     {
         foreach (var type in types)
