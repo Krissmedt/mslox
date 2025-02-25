@@ -1,7 +1,10 @@
-﻿namespace mslox.Service;
+﻿using System.Runtime.InteropServices.JavaScript;
+
+namespace mslox.Service;
 
 public class Parser
 {
+    private class ParseError : Exception { }
     private List<Token> Tokens { get; init; } = new();
     private int _current = 0;
 
@@ -119,6 +122,19 @@ public class Parser
             Consume(TokenType.RightParen, "Expect ')' after expression.");
             return new Grouping { Expression = expr };
         }
+    }
+
+    private Token Consume(TokenType type, String message)
+    {
+        if (Check(type)) return Advance();
+
+        throw Error(Peek(), message);
+    }
+
+    private ParseError Error(Token token, String message)
+    {
+        Lox.Error(token, message);
+        return new ParseError();
     }
 
     private bool Match(params TokenType[] types)
