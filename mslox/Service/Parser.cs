@@ -5,8 +5,18 @@ namespace mslox.Service;
 public class Parser
 {
     private class ParseError : Exception { }
-    private List<Token> Tokens { get; init; } = new();
+    public List<Token> Tokens { get; init; } = new();
     private int _current = 0;
+
+    public IExpr Parse() {
+        try {
+            return Expression();
+        }
+        catch (ParseError) 
+        {
+            return null;
+        }
+    }
 
     private IExpr Expression()
     {
@@ -122,6 +132,8 @@ public class Parser
             Consume(TokenType.RightParen, "Expect ')' after expression.");
             return new Grouping { Expression = expr };
         }
+
+        throw Error(Peek(), "Expect expression.");
     }
 
     private Token Consume(TokenType type, String message)

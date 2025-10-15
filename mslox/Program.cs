@@ -59,6 +59,12 @@ static void Run(string source)
 {
     var scanner = new Scanner { Source = source };
     var tokens = scanner.Scan();
+    
+    var parser = new Parser { Tokens = tokens };
+    var expression = parser.Parse();
 
-    foreach (var token in tokens) Console.WriteLine(token);
+    // Stop if there was a syntax error.
+    if (Lox.HadError) return;
+
+    Console.WriteLine(new AstPrinter().Print(expression));
 }
