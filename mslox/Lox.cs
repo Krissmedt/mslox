@@ -3,6 +3,7 @@
 public class Lox
 {
     public static bool HadError;
+    public static bool HadRuntimeError;
 
     public static void Error(long line, String message)
     {
@@ -23,6 +24,13 @@ public class Lox
         }
     }
 
+    public static void RuntimeError(RuntimeError error)
+    {
+        var sw = new StreamWriter(Console.OpenStandardError());
+        Console.SetError(sw);
+        Console.WriteLine($"{error.Message}\n[line {error.token.Line}]");
+        HadRuntimeError = true;
+        }
 
     private static void Report(long line, string where, string message)
     {

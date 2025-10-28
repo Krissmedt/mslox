@@ -35,6 +35,7 @@ static void RunFile(string filePath)
     Run(sourceString);
 
     if (Lox.HadError) throw new ApplicationException("Lox Error");
+    if (Lox.HadRuntimeError) Environment.Exit(70);
 }
 
 static void RunPrompt()
@@ -59,12 +60,17 @@ static void Run(string source)
 {
     var scanner = new Scanner { Source = source };
     var tokens = scanner.Scan();
-    
+
     var parser = new Parser { Tokens = tokens };
     var expression = parser.Parse();
 
     // Stop if there was a syntax error.
-    if (Lox.HadError) return;
+    if (Lox.HadError)
+    {
+        Lox.HadError = false;
+        return;
+    }
 
-    Console.WriteLine(new AstPrinter().Print(expression));
+    var interpreter = new Interpreter();
+    interpreter.Interpret(expression);
 }
