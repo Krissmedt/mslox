@@ -32,14 +32,15 @@ static void RunFile(string filePath)
         sourceString = reader.ReadToEnd();
     }
 
-    Run(sourceString);
+    Run(sourceString, new Interpreter());
 
     if (Lox.HadError) throw new ApplicationException("Lox Error");
-    if (Lox.HadRuntimeError) Environment.Exit(70);
+    if (Lox.HadRuntimeError) throw new ApplicationException("Lox Error");
 }
 
 static void RunPrompt()
 {
+    var sessionInterpreter = new Interpreter();
     Console.WriteLine("This is Lox");
 
     var running = true;
@@ -50,19 +51,19 @@ static void RunPrompt()
         if (line == null)
             running = false;
         else
-            Run(line);
+            Run(line, sessionInterpreter);
     }
 
     if (Lox.HadError) throw new ApplicationException("Lox Error");
 }
 
-static void Run(string source)
+static void Run(string source, Interpreter interpreter)
 {
     var scanner = new Scanner { Source = source };
     var tokens = scanner.Scan();
 
     var parser = new Parser { Tokens = tokens };
-    var expression = parser.Parse();
+    var program = parser.Parse();
 
     // Stop if there was a syntax error.
     if (Lox.HadError)
@@ -71,6 +72,5 @@ static void Run(string source)
         return;
     }
 
-    var interpreter = new Interpreter();
-    interpreter.Interpret(expression);
+    interpreter.Interpret(program);
 }

@@ -1,5 +1,7 @@
 ﻿namespace mslox.Service;
 
+using mslox.Expression;
+
 public class AstPrinter : IVisitor<string>
 {
     public string Visit(Unary expr)
@@ -20,6 +22,16 @@ public class AstPrinter : IVisitor<string>
     public string Visit(Literal expr)
     {
         return expr.Value == null ? "nil" : expr.Value.ToString();
+    }
+
+    public string Visit(Variable expr)
+    {
+        throw new NotImplementedException();
+    }
+
+    public string Visit(Assign expr)
+    {
+        throw new NotImplementedException();
     }
 
     public string Print(IExpr expr)

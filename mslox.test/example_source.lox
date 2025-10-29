@@ -5,5 +5,4 @@ var myMultiString = "Lox allows
 for multi-line strings by default!";
 var encapsulatingString = "I can put ,;()+-= operators in my string";
 
-if (word == "true") {}
-if (word != "true") {}
+print myInteger + myNumber;

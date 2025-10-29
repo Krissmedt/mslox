@@ -1,15 +1,22 @@
 using System.ComponentModel;
 using System.Data.Common;
-using mslox;
+namespace mslox;
 
-class Interpreter : IVisitor<Object>
+using mslox.Expression;
+using mslox.Statement;
+
+class Interpreter : Expression.IVisitor<Object>, Statement.IVisitor<Boolean>
 {
-    public void Interpret(IExpr expression)
+    private Environment environment = new Environment();
+
+    public void Interpret(List<IStmt> program)
     {
         try
         {
-            var value = evaluate(expression);
-            Console.WriteLine(stringify(value));
+            foreach (var stmt in program)
+            {
+                Execute(stmt);
+            }
         }
         catch (RuntimeError error)
         {
@@ -17,17 +24,52 @@ class Interpreter : IVisitor<Object>
         }
     }
 
+    public bool Visit(Var stmt)
+    {
+        Object value = null;
+
+        if (stmt.Initializer != null)
+        {
+            value = Evaluate(stmt.Initializer);
+        }
+
+        environment.Define(stmt.Name.Lexeme, value);
+
+        return true;
+    }
+
+    public bool Visit(ExpressionStmt stmt)
+    {
+        Evaluate(stmt.expression);
+        return true;
+    }
+
+    public bool Visit(Print stmt)
+    {
+        var value = Evaluate(stmt.expression);
+        Console.WriteLine(Stringify(value));
+        return true;
+    }
+
+    public object Visit(Assign expr)
+    {
+        var value = Evaluate(expr.Value);
+        environment.Assign(expr.Name, expr.Value);
+
+        return value;
+    }
+
     public object Visit(Unary expr)
     {
-        var right = evaluate(expr.Right);
+        var right = Evaluate(expr.Right);
 
         switch (expr.Operator.Type)
         {
             case TokenType.Minus:
-                checkNumberOperand(expr.Operator, right);
+                CheckNumberOperand(expr.Operator, right);
                 return -(double)right;
             case TokenType.Bang:
-                return !isTruthy(right);
+                return !IsTruthy(right);
         }
 
         return null;
@@ -35,13 +77,13 @@ class Interpreter : IVisitor<Object>
 
     public object Visit(Binary expr)
     {
-        var left = evaluate(expr.Left);
-        var right = evaluate(expr.Right);
+        var left = Evaluate(expr.Left);
+        var right = Evaluate(expr.Right);
 
         switch (expr.Operator.Type)
         {
             case TokenType.Minus:
-                checkNumberOperands(expr.Operator, left, right);
+                CheckNumberOperands(expr.Operator, left, right);
                 return (double)left - (double)right;
             case TokenType.Plus:
                 if (left is Double && right is Double)
@@ -56,27 +98,27 @@ class Interpreter : IVisitor<Object>
 
                 throw new RuntimeError(expr.Operator, "Operands must be two numbers or two strings");
             case TokenType.Slash:
-                checkNumberOperands(expr.Operator, left, right);
+                CheckNumberOperands(expr.Operator, left, right);
                 return (double)left / (double)right;
             case TokenType.Star:
-                checkNumberOperands(expr.Operator, left, right);
+                CheckNumberOperands(expr.Operator, left, right);
                 return (double)left * (double)right;
             case TokenType.Greater:
-                checkNumberOperands(expr.Operator, left, right);
+                CheckNumberOperands(expr.Operator, left, right);
                 return (double)left > (double)right;
             case TokenType.GreaterEqual:
-                checkNumberOperands(expr.Operator, left, right);
+                CheckNumberOperands(expr.Operator, left, right);
                 return (double)left >= (double)right;
             case TokenType.Less:
-                checkNumberOperands(expr.Operator, left, right);
+                CheckNumberOperands(expr.Operator, left, right);
                 return (double)left < (double)right;
             case TokenType.LessEqual:
-                checkNumberOperands(expr.Operator, left, right);
+                CheckNumberOperands(expr.Operator, left, right);
                 return (double)left <= (double)right;
             case TokenType.EqualEqual:
-                return isEqual(left, right);
+                return IsEqual(left, right);
             case TokenType.BangEqual:
-                return !isEqual(left, right);
+                return !IsEqual(left, right);
         }
 
         return null;
@@ -84,7 +126,7 @@ class Interpreter : IVisitor<Object>
 
     public object Visit(Grouping expr)
     {
-        return evaluate(expr.Expression);
+        return Evaluate(expr.Expression);
     }
 
     public object Visit(Literal expr)
@@ -92,19 +134,29 @@ class Interpreter : IVisitor<Object>
         return expr.Value;
     }
 
-    private Object evaluate(IExpr expr)
+    public object Visit(Variable expr)
+    {
+        return environment.Get(expr.Name);
+    }
+
+    private void Execute(IStmt stmt)
+    {
+        stmt.Accept(this);
+    }
+
+    private Object Evaluate(IExpr expr)
     {
         return expr.Accept(this);
     }
 
-    private Boolean isTruthy(Object value)
+    private Boolean IsTruthy(Object value)
     {
         if (value == null) return false;
         if (value is Boolean) return (Boolean)value;
         return true;
     }
 
-    private Boolean isEqual(Object a, Object b)
+    private Boolean IsEqual(Object a, Object b)
     {
         if (a == null && b == null) return true;
         if (a == null) return false;
@@ -112,19 +164,19 @@ class Interpreter : IVisitor<Object>
         return a.Equals(b);
     }
 
-    private void checkNumberOperand(Token op, Object operand)
+    private void CheckNumberOperand(Token op, Object operand)
     {
         if (operand is Double) return;
         throw new RuntimeError(op, "Operand must be a number");
     }
 
-    private void checkNumberOperands(Token op, Object left, Object right)
+    private void CheckNumberOperands(Token op, Object left, Object right)
     {
         if (left is Double && right is Double) return;
         throw new RuntimeError(op, "Operands must be numbers");
     }
 
-    private String stringify(Object value)
+    private String Stringify(Object value)
     {
         if (value == null) return null;
 
@@ -134,7 +186,7 @@ class Interpreter : IVisitor<Object>
             {
                 return "NaN";
             }
-            
+
             String text = value.ToString();
             if (text.EndsWith(".0"))
             {
@@ -143,7 +195,7 @@ class Interpreter : IVisitor<Object>
             return text;
         }
 
-        
+
 
         return value.ToString();
     }

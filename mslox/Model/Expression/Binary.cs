@@ -1,4 +1,4 @@
-﻿namespace mslox;
+﻿namespace mslox.Expression;
 
 public class Binary : IExpr
 {
