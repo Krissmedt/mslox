@@ -10,5 +10,5 @@ public interface IVisitor<T>
     T Visit(Print stmt);
     // T Visit(Return stmt);
     T Visit(Var stmt);
-    // T Visit(While stmt);
+    T Visit(While stmt);
 }

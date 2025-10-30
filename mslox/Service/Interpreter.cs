@@ -38,6 +38,16 @@ class Interpreter : Expression.IVisitor<Object>, Statement.IVisitor<Boolean>
         return true;
     }
 
+    public bool Visit(While stmt)
+    {
+        while (IsTruthy(stmt.Condition))
+        {
+            Execute(stmt.Body);
+        }
+
+        return true;
+    }
+
     public bool Visit(If stmt)
     {
         if (IsTruthy(Evaluate(stmt.Condition)))
