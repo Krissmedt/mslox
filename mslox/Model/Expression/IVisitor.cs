@@ -8,4 +8,5 @@ public interface IVisitor<T>
     T Visit(Literal expr);
     T Visit(Variable expr);
     T Visit(Assign expr);
+    T Visit(Logical expr);
 }

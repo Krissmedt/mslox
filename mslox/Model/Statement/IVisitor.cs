@@ -6,7 +6,7 @@ public interface IVisitor<T>
     // T Visit(Class stmt);
     T Visit(ExpressionStmt stmt);
     // T Visit(Function stmt);
-    // T Visit(If stmt);
+    T Visit(If stmt);
     T Visit(Print stmt);
     // T Visit(Return stmt);
     T Visit(Var stmt);

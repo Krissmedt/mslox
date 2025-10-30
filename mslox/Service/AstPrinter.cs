@@ -34,6 +34,11 @@ public class AstPrinter : IVisitor<string>
         throw new NotImplementedException();
     }
 
+    public string Visit(Logical expr)
+    {
+        throw new NotImplementedException();
+    }
+
     public string Print(IExpr expr)
     {
         return expr.Accept(this);

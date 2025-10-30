@@ -38,6 +38,20 @@ class Interpreter : Expression.IVisitor<Object>, Statement.IVisitor<Boolean>
         return true;
     }
 
+    public bool Visit(If stmt)
+    {
+        if (IsTruthy(Evaluate(stmt.Condition)))
+        {
+            Execute(stmt.IfBranch);
+        }
+        else if (stmt.ElseBranch != null)
+        {
+            Execute(stmt.ElseBranch);
+        }
+
+        return true;
+    }
+
     public bool Visit(ExpressionStmt stmt)
     {
         Evaluate(stmt.expression);
@@ -51,7 +65,7 @@ class Interpreter : Expression.IVisitor<Object>, Statement.IVisitor<Boolean>
         return true;
     }
 
-    
+
     public bool Visit(Block stmt)
     {
         ExecuteBlock(stmt.Statements, new Environment(environment));
@@ -147,6 +161,22 @@ class Interpreter : Expression.IVisitor<Object>, Statement.IVisitor<Boolean>
         return environment.Get(expr.Name);
     }
 
+    public object Visit(Logical expr)
+    {
+        var left = Evaluate(expr.Left);
+
+        if (expr.Operator.Type == TokenType.Or)
+        {
+            if (IsTruthy(left)) return left;
+        }
+        else
+        {
+            if (!IsTruthy(left)) return left;
+        }
+        
+        return Evaluate(expr.Right);
+    }
+
     private void Execute(IStmt stmt)
     {
         stmt.Accept(this);
@@ -164,7 +194,8 @@ class Interpreter : Expression.IVisitor<Object>, Statement.IVisitor<Boolean>
             {
                 Execute(statement);
             }
-        } finally
+        }
+        finally
         {
             this.environment = previous;
         }
