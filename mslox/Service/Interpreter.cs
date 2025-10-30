@@ -51,6 +51,14 @@ class Interpreter : Expression.IVisitor<Object>, Statement.IVisitor<Boolean>
         return true;
     }
 
+    
+    public bool Visit(Block stmt)
+    {
+        ExecuteBlock(stmt.Statements, new Environment(environment));
+        return true;
+    }
+
+
     public object Visit(Assign expr)
     {
         var value = Evaluate(expr.Value);
@@ -142,6 +150,24 @@ class Interpreter : Expression.IVisitor<Object>, Statement.IVisitor<Boolean>
     private void Execute(IStmt stmt)
     {
         stmt.Accept(this);
+    }
+
+    private void ExecuteBlock(List<IStmt> stmts, Environment environment)
+    {
+        var previous = this.environment;
+
+        try
+        {
+            this.environment = environment;
+
+            foreach (var statement in stmts)
+            {
+                Execute(statement);
+            }
+        } finally
+        {
+            this.environment = previous;
+        }
     }
 
     private Object Evaluate(IExpr expr)

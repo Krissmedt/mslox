@@ -53,6 +53,7 @@ public class Parser
     private IStmt Statement()
     {
         if (Match(TokenType.Print)) return PrintStatement();
+        if (Match(TokenType.LeftBrace)) return new Block(BlockStatement());
 
         return ExpressionStatement();
     }
@@ -62,6 +63,19 @@ public class Parser
         var value = Expression();
         Consume(TokenType.Semicolon, "Expect ';' after value.");
         return new Print(value);
+    }
+
+    private List<IStmt> BlockStatement()
+    {
+        List<IStmt> statements = new();
+
+        while (!Check(TokenType.RightBrace) && !IsAtEnd())
+        {
+            statements.Add(Declaration());
+        }
+
+        Consume(TokenType.RightBrace, "Expect '}' after block.");
+        return statements;
     }
 
     private IStmt ExpressionStatement()

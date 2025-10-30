@@ -1,8 +1,5 @@
-var myInteger = 6;
-var myNumber = 12.46548;
-var myString = "Hello world!";
-var myMultiString = "Lox allows 
-for multi-line strings by default!";
-var encapsulatingString = "I can put ,;()+-= operators in my string";
-
-print myInteger + myNumber;
+var a = 1;
+{
+  var a = a + 2;
+  print a;
+}

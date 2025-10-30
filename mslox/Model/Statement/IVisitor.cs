@@ -2,7 +2,7 @@
 
 public interface IVisitor<T>
 {
-    // T Visit(Block stmt);
+    T Visit(Block stmt);
     // T Visit(Class stmt);
     T Visit(ExpressionStmt stmt);
     // T Visit(Function stmt);
