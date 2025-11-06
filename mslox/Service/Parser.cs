@@ -52,12 +52,63 @@ public class Parser
 
     private IStmt Statement()
     {
+        if (Match(TokenType.For)) return ForStatement();
         if (Match(TokenType.If)) return IfStatement();
         if (Match(TokenType.Print)) return PrintStatement();
         if (Match(TokenType.While)) return WhileStatement();
         if (Match(TokenType.LeftBrace)) return new Block(BlockStatement());
 
         return ExpressionStatement();
+    }
+
+    private IStmt ForStatement()
+    {
+        Consume(TokenType.LeftParen, "Expect '(' after 'for'.");
+
+        IStmt? initializer;
+        if (Match(TokenType.Semicolon))
+        {
+            initializer = null;
+        }
+        else if (Match(TokenType.Var))
+        {
+            initializer = VarDeclaration();
+        }
+        else
+        {
+            initializer = ExpressionStatement();
+        }
+
+        IExpr condition = null;
+        if (!Check(TokenType.Semicolon))
+        {
+            condition = Expression();
+        }
+        Consume(TokenType.Semicolon, "Expect ';' after loop condition.");
+
+        IExpr increment = null;
+        if (!Check(TokenType.RightParen))
+        {
+            increment = Expression();
+        }
+        Consume(TokenType.RightParen, "Expect ')' after for clauses.");
+
+        IStmt body = Statement();
+
+        if (increment != null)
+        {
+            body = new Block([body, new ExpressionStmt(increment)]);
+        }
+
+        if (condition == null) condition = new Literal { Value = true };
+        body = new While(condition, body);
+
+        if (initializer != null)
+        {
+            body = new Block([initializer, body]);
+        }
+
+        return body;
     }
 
     private IStmt IfStatement()
