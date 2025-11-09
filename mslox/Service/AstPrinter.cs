@@ -29,6 +29,11 @@ public class AstPrinter : IVisitor<string>
         throw new NotImplementedException();
     }
 
+    public string Visit(Call expr)
+    {
+        throw new NotImplementedException();
+    }
+
     public string Visit(Assign expr)
     {
         throw new NotImplementedException();

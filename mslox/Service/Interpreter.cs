@@ -1,13 +1,18 @@
-using System.ComponentModel;
-using System.Data.Common;
 namespace mslox;
 
 using mslox.Expression;
 using mslox.Statement;
 
-class Interpreter : Expression.IVisitor<Object>, Statement.IVisitor<Boolean>
+public class Interpreter : Expression.IVisitor<Object>, Statement.IVisitor<Boolean>
 {
-    private Environment environment = new Environment();
+    public Environment Globals { get; } = new Environment();
+    private Environment environment;
+
+    public Interpreter()
+    {
+        Globals.Define("clock", new Clock());
+        this.environment = Globals;
+    }
 
     public void Interpret(List<IStmt> program)
     {
@@ -40,7 +45,7 @@ class Interpreter : Expression.IVisitor<Object>, Statement.IVisitor<Boolean>
 
     public bool Visit(While stmt)
     {
-        while (IsTruthy(stmt.Condition))
+        while (IsTruthy(Evaluate(stmt.Condition)))
         {
             Execute(stmt.Body);
         }
@@ -68,11 +73,27 @@ class Interpreter : Expression.IVisitor<Object>, Statement.IVisitor<Boolean>
         return true;
     }
 
+    public bool Visit(Function stmt)
+    {
+        var function = new LoxFunction(stmt, environment);
+        environment.Define(stmt.Name.Lexeme, function);
+
+        return true;
+    }
+
     public bool Visit(Print stmt)
     {
         var value = Evaluate(stmt.expression);
         Console.WriteLine(Stringify(value));
         return true;
+    }
+
+    public bool Visit(Return stmt)
+    {
+        object value = null;
+        if (stmt.Value != null) value = Evaluate(stmt.Value);
+
+        throw new ReturnUnwind(value);
     }
 
 
@@ -86,7 +107,7 @@ class Interpreter : Expression.IVisitor<Object>, Statement.IVisitor<Boolean>
     public object Visit(Assign expr)
     {
         var value = Evaluate(expr.Value);
-        environment.Assign(expr.Name, expr.Value);
+        environment.Assign(expr.Name, value);
 
         return value;
     }
@@ -105,6 +126,31 @@ class Interpreter : Expression.IVisitor<Object>, Statement.IVisitor<Boolean>
         }
 
         return null;
+    }
+
+    public object Visit(Call expr)
+    {
+        var callee = Evaluate(expr.Callee);
+
+        List<Object> arguments = new();
+        foreach (var argument in expr.Arguments)
+        {
+            arguments.Add(Evaluate(argument));
+        }
+
+        if (!(callee is LoxCallable))
+        {
+            throw new RuntimeError(expr.Paren, "Can only call functions and classes");
+        }
+
+        var function = (LoxCallable)callee;
+
+        if (arguments.Count != function.Arity())
+        {
+            throw new RuntimeError(expr.Paren, $"Expected {function.Arity()} arguments but got {arguments.Count}.");
+        }
+
+        return function.Call(this, arguments);
     }
 
     public object Visit(Binary expr)
@@ -183,16 +229,16 @@ class Interpreter : Expression.IVisitor<Object>, Statement.IVisitor<Boolean>
         {
             if (!IsTruthy(left)) return left;
         }
-        
+
         return Evaluate(expr.Right);
     }
 
-    private void Execute(IStmt stmt)
+    public void Execute(IStmt stmt)
     {
         stmt.Accept(this);
     }
 
-    private void ExecuteBlock(List<IStmt> stmts, Environment environment)
+    public void ExecuteBlock(List<IStmt> stmts, Environment environment)
     {
         var previous = this.environment;
 

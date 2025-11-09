@@ -1,4 +1,4 @@
-using mslox.Statement;
+namespace mslox.Statement;
 
 public class Block : IStmt
 {
