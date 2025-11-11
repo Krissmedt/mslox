@@ -1,5 +1,6 @@
 namespace mslox;
 
+using System.Reflection.Metadata;
 using mslox.Expression;
 using mslox.Statement;
 
@@ -7,6 +8,7 @@ public class Interpreter : Expression.IVisitor<Object>, Statement.IVisitor<Boole
 {
     public Environment Globals { get; } = new Environment();
     private Environment environment;
+    private Dictionary<IExpr, int> locals = new();
 
     public Interpreter()
     {
@@ -214,7 +216,7 @@ public class Interpreter : Expression.IVisitor<Object>, Statement.IVisitor<Boole
 
     public object Visit(Variable expr)
     {
-        return environment.Get(expr.Name);
+        return LookupVariable(expr.Name, expr);
     }
 
     public object Visit(Logical expr)
@@ -255,6 +257,11 @@ public class Interpreter : Expression.IVisitor<Object>, Statement.IVisitor<Boole
         {
             this.environment = previous;
         }
+    }
+
+    public void Resolve(IExpr expr, int depth)
+    {
+        locals.Add(expr, depth);
     }
 
     private Object Evaluate(IExpr expr)
@@ -311,5 +318,16 @@ public class Interpreter : Expression.IVisitor<Object>, Statement.IVisitor<Boole
 
 
         return value.ToString();
+    }
+
+    private Object LookupVariable(Token name, IExpr expr)
+    {
+        if (locals.ContainsKey(expr))
+        {
+            return environment.GetAt(locals[expr], name);
+        } else
+        {
+            return Globals.Get(name);
+        }
     }
 }

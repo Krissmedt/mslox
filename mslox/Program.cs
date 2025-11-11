@@ -72,5 +72,15 @@ static void Run(string source, Interpreter interpreter)
         return;
     }
 
+    var resolver = new Resolver(interpreter);
+    resolver.Resolve(program);
+
+    // Stop if there was a resolution error.
+    if (Lox.HadError)
+    {
+        Lox.HadError = false;
+        return;
+    }
+
     interpreter.Interpret(program);
 }
