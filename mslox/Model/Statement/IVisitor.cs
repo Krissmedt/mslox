@@ -3,7 +3,7 @@
 public interface IVisitor<T>
 {
     T Visit(Block stmt);
-    // T Visit(Class stmt);
+    T Visit(ClassStmt stmt);
     T Visit(ExpressionStmt stmt);
     T Visit(Function stmt);
     T Visit(If stmt);

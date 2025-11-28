@@ -33,6 +33,19 @@ public class Resolver : Expression.IVisitor<Boolean>, Statement.IVisitor<Boolean
         return true;
     }
 
+    public bool Visit(Get expr)
+    {
+        Resolve(expr.Object);
+        return true;
+    }
+
+    public bool Visit(Set expr)
+    {
+        Resolve(expr.Value);
+        Resolve(expr.Object);
+        return true;
+    }
+
     public bool Visit(Binary expr)
     {
         Resolve(expr.Left);
@@ -83,6 +96,14 @@ public class Resolver : Expression.IVisitor<Boolean>, Statement.IVisitor<Boolean
         BeginScope();
         Resolve(stmt.Statements);
         EndScope();
+
+        return true;
+    }
+
+    public bool Visit(ClassStmt stmt)
+    {
+        Declare(stmt.name);
+        Define(stmt.name);
 
         return true;
     }

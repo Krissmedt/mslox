@@ -102,9 +102,18 @@ public class Interpreter : Expression.IVisitor<Object>, Statement.IVisitor<Boole
     public bool Visit(Block stmt)
     {
         ExecuteBlock(stmt.Statements, new Environment(environment));
+
         return true;
     }
 
+    public bool Visit(ClassStmt stmt)
+    {
+        environment.Define(stmt.name.Lexeme, null);
+        LoxClass klass = new LoxClass(stmt.name.Lexeme);
+        environment.Assign(stmt.name, klass);
+
+        return true;
+    }
 
     public object Visit(Assign expr)
     {
@@ -153,6 +162,17 @@ public class Interpreter : Expression.IVisitor<Object>, Statement.IVisitor<Boole
         }
 
         return function.Call(this, arguments);
+    }
+
+    public object Visit(Get expr)
+    {
+        var obj = Evaluate(expr.Object);
+        if (obj.GetType() == typeof(LoxInstance))
+        {
+            return ((LoxInstance)obj).Get(expr.Name);
+        }
+
+        throw new RuntimeError(expr.Name, "Only instances have properties.");
     }
 
     public object Visit(Binary expr)
@@ -233,6 +253,21 @@ public class Interpreter : Expression.IVisitor<Object>, Statement.IVisitor<Boole
         }
 
         return Evaluate(expr.Right);
+    }
+
+    public object Visit(Set expr)
+    {
+        var obj = Evaluate(expr.Object);
+
+        if (!(obj is LoxInstance))
+        {
+            throw new RuntimeError(expr.Name, "Only instances have fields.");
+        }
+
+        var value = Evaluate(expr.Value);
+        ((LoxInstance)obj).Set(expr.Name, value);
+
+        return value;
     }
 
     public void Execute(IStmt stmt)

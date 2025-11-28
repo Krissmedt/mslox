@@ -56,4 +56,14 @@ public class AstPrinter : IVisitor<string>
 
         return $"({name}{expressionString})";
     }
+
+    public string Visit(Get expr)
+    {
+        throw new NotImplementedException();
+    }
+
+    public string Visit(Set expr)
+    {
+        throw new NotImplementedException();
+    }
 }
