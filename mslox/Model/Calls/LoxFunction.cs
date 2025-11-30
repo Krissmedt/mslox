@@ -32,8 +32,16 @@ public class LoxFunction : LoxCallable
         {
             return returnThrow.Value;
         }
-        
+
         return null;
+    }
+    
+    public LoxFunction Bind(LoxInstance instance)
+    {
+        var environment = new Environment(closure);
+        environment.Define("this", instance);
+
+        return new LoxFunction(declaration, environment);
     }
 
     public override string ToString()

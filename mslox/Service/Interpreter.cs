@@ -1,5 +1,6 @@
 namespace mslox;
 
+using System.Data;
 using System.Reflection.Metadata;
 using mslox.Expression;
 using mslox.Statement;
@@ -109,7 +110,15 @@ public class Interpreter : Expression.IVisitor<Object>, Statement.IVisitor<Boole
     public bool Visit(ClassStmt stmt)
     {
         environment.Define(stmt.name.Lexeme, null);
-        LoxClass klass = new LoxClass(stmt.name.Lexeme);
+
+        Dictionary<String, LoxFunction> methods = [];
+        foreach(var method in stmt.methods)
+        {
+            var function = new LoxFunction(method, environment);
+            methods.Add(method.Name.Lexeme, function);
+        }
+
+        LoxClass klass = new LoxClass(stmt.name.Lexeme, methods);
         environment.Assign(stmt.name, klass);
 
         return true;
@@ -167,7 +176,7 @@ public class Interpreter : Expression.IVisitor<Object>, Statement.IVisitor<Boole
     public object Visit(Get expr)
     {
         var obj = Evaluate(expr.Object);
-        if (obj.GetType() == typeof(LoxInstance))
+        if (obj is LoxInstance)
         {
             return ((LoxInstance)obj).Get(expr.Name);
         }
@@ -268,6 +277,11 @@ public class Interpreter : Expression.IVisitor<Object>, Statement.IVisitor<Boole
         ((LoxInstance)obj).Set(expr.Name, value);
 
         return value;
+    }
+
+    public object Visit(This expr)
+    {
+        return LookupVariable(expr.keyword, expr);
     }
 
     public void Execute(IStmt stmt)

@@ -1,4 +1,5 @@
 using mslox;
+using mslox.Statement;
 
 public class LoxInstance
 {
@@ -16,6 +17,9 @@ public class LoxInstance
         {
             return fields[name.Lexeme];
         }
+
+        var method = klass.FindMethod(name.Lexeme);
+        if (method != null) return method.Bind(this);
 
         throw new RuntimeError(name, $"Undefined property {name.Lexeme}.");
     }

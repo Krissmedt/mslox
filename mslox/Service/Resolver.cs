@@ -46,6 +46,12 @@ public class Resolver : Expression.IVisitor<Boolean>, Statement.IVisitor<Boolean
         return true;
     }
 
+    public bool Visit(This expr)
+    {
+        ResolveLocal(expr, expr.keyword);
+        return true;
+    }
+
     public bool Visit(Binary expr)
     {
         Resolve(expr.Left);
@@ -104,6 +110,17 @@ public class Resolver : Expression.IVisitor<Boolean>, Statement.IVisitor<Boolean
     {
         Declare(stmt.name);
         Define(stmt.name);
+
+        BeginScope();
+        scopes.Peek().Add("this", true);
+
+        foreach (var method in stmt.methods)
+        {
+            var declaration = FunctionType.METHOD;
+            ResolveFunction(method, declaration);
+        }
+
+        EndScope();
 
         return true;
     }
@@ -201,11 +218,11 @@ public class Resolver : Expression.IVisitor<Boolean>, Statement.IVisitor<Boolean
 
     private void ResolveLocal(IExpr expr, Token name)
     {
-        for (var i = scopes.Count - 1; i >= 0; i--)
+        for (var i = 0; i < scopes.Count; i++)
         {
             if (scopes.ElementAt(i).ContainsKey(name.Lexeme))
             {
-                interpreter.Resolve(expr, scopes.Count - 1 - i);
+                interpreter.Resolve(expr, i);
                 return;
             }
         }

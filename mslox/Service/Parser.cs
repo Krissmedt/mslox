@@ -428,6 +428,8 @@ public class Parser
             return new Literal { Value = Previous().Literal };
         }
 
+        if (Match(TokenType.This)) return new This { keyword = Previous() };
+
         if (Match(TokenType.Identifier))
         {
             return new Variable(Previous());

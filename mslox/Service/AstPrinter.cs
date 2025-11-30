@@ -66,4 +66,9 @@ public class AstPrinter : IVisitor<string>
     {
         throw new NotImplementedException();
     }
+
+    public string Visit(This expr)
+    {
+        throw new NotImplementedException();
+    }
 }
