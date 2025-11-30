@@ -8,6 +8,7 @@ public class Resolver : Expression.IVisitor<Boolean>, Statement.IVisitor<Boolean
     private Interpreter interpreter;
     private Stack<Dictionary<String, Boolean>> scopes = new();
     private FunctionType currentFunction = FunctionType.NONE;
+    private ClassType currentClass = ClassType.NONE;
 
     #region Expression Visitor
     public Resolver(Interpreter interpreter)
@@ -48,6 +49,12 @@ public class Resolver : Expression.IVisitor<Boolean>, Statement.IVisitor<Boolean
 
     public bool Visit(This expr)
     {
+        if (currentClass == ClassType.NONE)
+        {
+            Lox.Error(expr.keyword, "Can't use 'this' outside of a class");
+            return true;
+        }
+
         ResolveLocal(expr, expr.keyword);
         return true;
     }
@@ -108,6 +115,10 @@ public class Resolver : Expression.IVisitor<Boolean>, Statement.IVisitor<Boolean
 
     public bool Visit(ClassStmt stmt)
     {
+
+        var enclosingClass = currentClass;
+        currentClass = ClassType.CLASS;
+
         Declare(stmt.name);
         Define(stmt.name);
 
@@ -117,11 +128,16 @@ public class Resolver : Expression.IVisitor<Boolean>, Statement.IVisitor<Boolean
         foreach (var method in stmt.methods)
         {
             var declaration = FunctionType.METHOD;
+            if (method.Name.Lexeme == "init")
+            {
+                declaration = FunctionType.INITIALIZER;
+            }
             ResolveFunction(method, declaration);
         }
 
         EndScope();
 
+        currentClass = enclosingClass;
         return true;
     }
 
@@ -163,6 +179,11 @@ public class Resolver : Expression.IVisitor<Boolean>, Statement.IVisitor<Boolean
 
         if (stmt.Value != null)
         {
+            if (currentFunction == FunctionType.INITIALIZER)
+            {
+                Lox.Error(stmt.Keyword, "Can't return a value from an initializer");
+            }
+
             Resolve(stmt.Value);
         }
         return true;

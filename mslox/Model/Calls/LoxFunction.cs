@@ -3,12 +3,14 @@ namespace mslox;
 public class LoxFunction : LoxCallable
 {
     private Environment closure;
+    private Boolean isInitializer;
     private Statement.Function declaration;
 
-    public LoxFunction(Statement.Function declaration, Environment closure)
+    public LoxFunction(Statement.Function declaration, Environment closure, Boolean isInitializer)
     {
         this.declaration = declaration;
         this.closure = closure;
+        this.isInitializer = isInitializer;
     }
 
     public int Arity()
@@ -30,9 +32,11 @@ public class LoxFunction : LoxCallable
         }
         catch (ReturnUnwind returnThrow)
         {
+            if (isInitializer) return closure.GetAt(0, "this");
             return returnThrow.Value;
         }
 
+        if (isInitializer) return closure.GetAt(0, "this");
         return null;
     }
     
@@ -41,7 +45,7 @@ public class LoxFunction : LoxCallable
         var environment = new Environment(closure);
         environment.Define("this", instance);
 
-        return new LoxFunction(declaration, environment);
+        return new LoxFunction(declaration, environment, isInitializer);
     }
 
     public override string ToString()

@@ -78,7 +78,7 @@ public class Interpreter : Expression.IVisitor<Object>, Statement.IVisitor<Boole
 
     public bool Visit(Function stmt)
     {
-        var function = new LoxFunction(stmt, environment);
+        var function = new LoxFunction(stmt, environment, false);
         environment.Define(stmt.Name.Lexeme, function);
 
         return true;
@@ -114,7 +114,7 @@ public class Interpreter : Expression.IVisitor<Object>, Statement.IVisitor<Boole
         Dictionary<String, LoxFunction> methods = [];
         foreach(var method in stmt.methods)
         {
-            var function = new LoxFunction(method, environment);
+            var function = new LoxFunction(method, environment, method.Name.Lexeme == "init");
             methods.Add(method.Name.Lexeme, function);
         }
 

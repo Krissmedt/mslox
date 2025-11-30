@@ -60,6 +60,23 @@ public class Environment
         return Ancestor(distance).Get(name);
     }
 
+    public Object Get(String name)
+    {
+        if (values.TryGetValue(name, out var value))
+        {
+            return value;
+        }
+
+        if (enclosing != null) return enclosing.Get(name);
+
+        throw new RuntimeError(null, $"Undefined variable '{name}'.");
+    }
+
+    public Object GetAt(int distance, String name)
+    {
+        return Ancestor(distance).Get(name);
+    }
+
     public Environment Ancestor(int distance)
     {
         var environment = this;
