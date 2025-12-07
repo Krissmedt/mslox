@@ -3,11 +3,13 @@ using mslox;
 public class LoxClass : LoxCallable
 {
     public String name;
+    public LoxClass superclass;
     public Dictionary<String, LoxFunction> methods;
 
-    public LoxClass(String name, Dictionary<String, LoxFunction> methods)
+    public LoxClass(String name, LoxClass superclass, Dictionary<String, LoxFunction> methods)
     {
         this.name = name;
+        this.superclass = superclass;
         this.methods = methods;
     }
 
@@ -33,9 +35,12 @@ public class LoxClass : LoxCallable
     public LoxFunction FindMethod(String name)
     {
         LoxFunction output = null;
-        methods.TryGetValue(name, out output);
-        
-        return output;
+        var found = methods.TryGetValue(name, out output);
+        if (found) return output;
+
+        if (superclass != null) return superclass.FindMethod(name);
+
+        return null;
     }
 
     public override String ToString()

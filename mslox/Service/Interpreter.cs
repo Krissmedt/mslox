@@ -109,6 +109,16 @@ public class Interpreter : Expression.IVisitor<Object>, Statement.IVisitor<Boole
 
     public bool Visit(ClassStmt stmt)
     {
+        Object superclass = null;
+        if (stmt.superclass != null)
+        {
+            superclass = Evaluate(stmt.superclass);
+            if (!(superclass is LoxClass))
+            {
+                throw new RuntimeError(stmt.superclass.Name, "Superclass must be a class");
+            }
+        }
+
         environment.Define(stmt.name.Lexeme, null);
 
         Dictionary<String, LoxFunction> methods = [];
@@ -118,7 +128,7 @@ public class Interpreter : Expression.IVisitor<Object>, Statement.IVisitor<Boole
             methods.Add(method.Name.Lexeme, function);
         }
 
-        LoxClass klass = new LoxClass(stmt.name.Lexeme, methods);
+        LoxClass klass = new LoxClass(stmt.name.Lexeme, (LoxClass) superclass, methods);
         environment.Assign(stmt.name, klass);
 
         return true;

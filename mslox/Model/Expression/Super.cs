@@ -1,13 +1,9 @@
 namespace mslox.Expression;
 
-public class Variable : IExpr
+public class Super : IExpr
 {
-    public Token Name;
-
-    public Variable(Token name)
-    {
-        this.Name = name;
-    }
+    public required Token keyword { get; init; }
+    public required Token method { get; init; }
 
     public T Accept<T>(IVisitor<T> visitor)
     {

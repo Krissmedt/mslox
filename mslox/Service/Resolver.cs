@@ -122,6 +122,16 @@ public class Resolver : Expression.IVisitor<Boolean>, Statement.IVisitor<Boolean
         Declare(stmt.name);
         Define(stmt.name);
 
+        if (stmt.superclass != null && stmt.name.Lexeme == stmt.superclass.Name.Lexeme)
+        {
+            Lox.Error(stmt.superclass.Name, "A class can't inherit from itself");
+        }
+
+        if (stmt.superclass != null)
+        {
+            Resolve(stmt.superclass);
+        }
+
         BeginScope();
         scopes.Peek().Add("this", true);
 

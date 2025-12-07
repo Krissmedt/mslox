@@ -13,4 +13,5 @@ public interface IVisitor<T>
     T Visit(Logical expr);
     T Visit(Set expr);
     T Visit(This expr);
+    T Visit(Super expr);
 }
